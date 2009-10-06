@@ -2,6 +2,10 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Mandy::Task do
   describe "job parameters" do
+    before(:each) do
+      ENV["json"] = nil
+    end
+    
     it "should allow access to environment variables" do
       ENV["variable_test"] = "hello world"
       Mandy::Task.new.send(:parameter, :variable_test).should == "hello world"
