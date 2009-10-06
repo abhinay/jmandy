@@ -4,7 +4,6 @@ require File.join(File.dirname(__FILE__), *%w[.. .. .. examples word_count])
 
 describe "Word count example" do
   before(:all) do
-    Mandy::Job.jobs.delete_if {|j| !(j.name == "Word Count")}
     @word_count_runner = Mandy::TestRunner.new("Word Count")
   end
   

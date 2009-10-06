@@ -10,8 +10,12 @@ job "Parameterised job" do
 end
 
 describe "Parameterised example" do
-  before(:all) do
+  before(:each) do
     @runner = Mandy::TestRunner.new("Parameterised job", :parameters => {:argument => "hello world"})
+  end
+  
+  after(:each) do
+    Mandy::Job.jobs.delete_if {|job| job.name == "Parameterised job"}
   end
   
   describe "Mapper" do
