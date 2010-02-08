@@ -1,15 +1,10 @@
-require "fileutils"
-
-module Mandy
-  class Packer
-    def self.unpack(file)
-      return false unless File.extname(file) == '.tar'
-      `tar -xf #{file}`
-      `geminstaller --sudo --silent --exceptions`
-    end
-  end
+def setup(conf)
 end
 
-Mandy::Packer.unpack(ARGV[0])
+def map(key, value, output)
+  Mandy::Job.find_by_name(job_name).run_map(key, value, output)
+end
 
-exec("mandy-#{ARGV[1]} #{ARGV[2]} '#{ARGV[3]}'")
+def reduce(key, values, output)
+  Mandy::Job.find_by_name(job_name).run_reduce(key, values, output)
+end

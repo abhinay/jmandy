@@ -1,7 +1,6 @@
 module Mandy
   class Job
-    JSON_PAYLOAD_KEY = "json"
-    
+
     class << self
       def jobs
         @jobs ||= []
@@ -9,22 +8,6 @@ module Mandy
       
       def find_by_name(name)
         jobs.find {|job| job.name == name }
-      end
-      
-      def parameter(name)
-        param = find_json_param(name) if json_provided?
-        param || ENV[name.to_s]
-      end
-
-      private
-
-      def find_json_param(name)
-        json_args = JSON.parse(CGI.unescape(ENV[JSON_PAYLOAD_KEY]))
-        json_args[name.to_s]
-      end
-
-      def json_provided?
-        !ENV[JSON_PAYLOAD_KEY].nil?
       end
     end
     
@@ -35,27 +18,10 @@ module Mandy
     def initialize(name, &blk)
       @name = name
       @settings = {}
-      @modules = []
       @map, @reduce = nil, nil
       set('mapred.job.name', name)
       instance_eval(&blk) if blk
       auto_set_reduce_count
-    end
-    
-    def mixin(*modules)
-      modules.each {|m| @modules << m}
-    end
-    alias_method :serialize, :mixin
-
-    def input_format(format=nil, options={})
-      return @input_format if format.nil?
-      
-      @input_format = format
-      @input_format_options = options
-    end
-    
-    def output_format(format)
-      @output_format = format
     end
     
     def set(key, value)
@@ -68,15 +34,6 @@ module Mandy
     
     def reduce_tasks(count)
       set('mapred.reduce.tasks', count)
-    end
-    
-    def store(type, name, options={})
-      Mandy.stores[name] = case type
-      when :hbase
-        Stores::HBase.new(options)
-      else
-        raise "Unknown store type #{type}"
-      end
     end
     
     def setup(&blk)
@@ -95,15 +52,14 @@ module Mandy
       @reduce = klass || blk
     end
     
-    def run_map(input=STDIN, output=STDOUT, &blk)
-      mapper_class.send(:include, Mandy::IO::OutputFormatting) unless reducer_defined?
-      mapper = mapper_class.new(input, output, @input_format, @output_format)
+    def run_map(key, value, output, &blk)
+      mapper = mapper_class.new(key, value, output)
       yield(mapper) if blk
       mapper.execute
     end
     
-    def run_reduce(input=STDIN, output=STDOUT, &blk)
-      reducer = reducer_class.new(input, output, @input_format, @output_format)
+    def run_reduce(key, values, output, &blk)
+      reducer = reducer_class.new(key, values, output)
       yield(reducer) if blk
       reducer.execute
     end
@@ -130,22 +86,11 @@ module Mandy
     end
     
     def compile_map
-      args = {}
-      args[:setup] = @setup if @setup
-      args[:teardown] = @teardown if @teardown
-      @mapper_class = @map.is_a?(Proc) ? Mandy::Mappers::Base.compile(args, &@map) : @map
-      @modules.each {|m| @mapper_class.send(:include, m) }
-      @mapper_class
+      @map.is_a?(Proc) ? Mandy::Mappers::Base.compile({}, &@map) : @map
     end
     
     def compile_reduce
-      args = {}
-      args[:setup] = @setup if @setup
-      args[:teardown] = @teardown if @teardown
-      @reducer_class = @reduce.is_a?(Proc) ? Mandy::Reducers::Base.compile(args, &@reduce) : @reduce
-      @modules.each {|m| @reducer_class.send(:include, m) }
-      @reducer_class
+      @reduce.is_a?(Proc) ? Mandy::Reducers::Base.compile({}, &@reduce) : @reduce
     end
-    
   end
 end
