@@ -1,7 +1,7 @@
 require "rubygems"
-require "json"
 require "uri"
-require "cgi"
+# require "json"
+# require "cgi"
 require "fileutils"
 
 %w(

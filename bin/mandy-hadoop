@@ -3,7 +3,7 @@ require "rubygems"
 require "mandy"
 require 'optparse'
 require 'ostruct'
-require 'cgi'
+require 'uri'
 
 errors = false
 options = OpenStruct.new
@@ -23,9 +23,9 @@ OptionParser.new do |opts|
     options.cmdenv = config
   end
   
-  opts.on("-j", '--json {"key":"1 value"}', "Pass JSON encoded parameters to jobs") do |config|
-    options.cmdenv = "json=#{CGI.escape(config)}"
-  end
+  # opts.on("-j", '--json {"key":"1 value"}', "Pass JSON encoded parameters to jobs") do |config|
+  #   options.cmdenv = "json=#{CGI.escape(config)}"
+  # end
   
   opts.on("-g", '--gemfile filepath', "Path to your jobs gem yml file (defaults to ./gems.yml)") do |config|
     options.gemfile = config
@@ -56,7 +56,7 @@ def set_env(opts_string)
   end
 end
 
-file   = ARGV[0]
+file   = File.expand_path(ARGV[0])
 filename = File.basename(file)
 inputs  = ARGV[1].split(",")
 input = inputs.map {|path| "#{path}"}.join(" ")
@@ -88,7 +88,7 @@ begin
     output = File.join(output_folder, "#{i+1}-#{job.name.downcase.gsub(/\W/, '-')}")
     bootstrap_file = File.expand_path(File.join(File.dirname(__FILE__), '..', 'bootstrap.rb'))
 
-    command = %(joh #{bootstrap_file} #{input} #{output} #{file} #{job.name})
+    command = %(joh #{bootstrap_file} #{input} #{output} #{file} #{URI.escape(job.name)})
     puts command
     result = []
     IO.popen(command, 'r') do |subprocess|
