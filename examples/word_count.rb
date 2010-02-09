@@ -6,6 +6,9 @@ require "lib/mandy"
 # a job can consist of a map block, a reduce block or both along with some configuration options.
 # this job counts words in the input document.
 Mandy.job "Word Count" do
+  map_tasks 5
+  reduce_tasks 5
+  
   map do |key, value|
     words = {}
     value.split(' ').each do |word|

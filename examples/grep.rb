@@ -1,12 +1,10 @@
-require 'rubygems'
-require 'mandy'
-
-Mandy.local_input = File.join(File.dirname(__FILE__), 'alice.txt1')
+# PATH HACK
+require "lib/mandy"
 
 Mandy.job "Grep" do
-  map_tasks 5
-
-  map do |line|
-    emit(line) if line =~ /Alice/
+  map do |key, line|
+    if line =~ /Alice/
+      emit(line,0)
+    end
   end
 end

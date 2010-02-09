@@ -2,8 +2,16 @@ require 'uri'
 
 def setup(conf)
   args = conf.get("mapred.args").split(",")
-  conf.set("mandy.job.script", args[2])
-  conf.set("mandy.job.name", URI.unescape(args[3]))
+  script = args[2]
+  job_name = URI.unescape(args[3])
+  conf.set("mandy.job.script", script)
+  conf.set("mandy.job.name", job_name)
+
+  require script
+  job = Mandy::Job.find_by_name(job_name)
+  job.settings.each { |key, value| conf.set(key,value) }
+
+  return nil
 end
 
 def map(key, value, context)
