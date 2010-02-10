@@ -1,7 +1,7 @@
-# PATH HACK
-require "lib/mandy"
+require "rubygems"
+require "jmandy"
 
-Mandy.job "Grep" do
+JMandy.job "Grep" do
   map do |key, line|
     if line =~ /Alice/
       emit(line,0)

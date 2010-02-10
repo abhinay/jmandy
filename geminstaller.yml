@@ -1,4 +1,7 @@
 gems:
 - name: mandy
   install_options: --source http://gemcutter.org
-  version: =<%= File.read(File.expand_path(File.join(File.dirname(__FILE__),'VERSION')))%>
+- name: jmandy
+  install_options: --source http://gemcutter.org
+- name: jruby-on-hadoop
+  install_options: --source http://gems.trafficbroker.co.uk

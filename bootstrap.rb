@@ -8,7 +8,7 @@ def setup(conf)
   conf.set("mandy.job.name", job_name)
 
   require script
-  job = Mandy::Job.find_by_name(job_name)
+  job = JMandy::Job.find_by_name(job_name)
   job.settings.each { |key, value| conf.set(key,value) }
 
   return nil
@@ -18,12 +18,12 @@ def map(key, value, context)
   script = context.get_conf.get("mandy.job.script")
   job_name = context.get_conf.get("mandy.job.name")
   require script
-  Mandy::Job.find_by_name(job_name).run_map(key, value, context)
+  JMandy::Job.find_by_name(job_name).run_map(key, value, context)
 end
 
 def reduce(key, values, context)
   script = context.get_conf.get("mandy.job.script")
   job_name = context.get_conf.get("mandy.job.name")
   require script
-  Mandy::Job.find_by_name(job_name).run_reduce(key, values, context)
+  JMandy::Job.find_by_name(job_name).run_reduce(key, values, context)
 end

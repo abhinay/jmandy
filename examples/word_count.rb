@@ -1,11 +1,9 @@
-# normally just requiring mandy through gems is fine.
-# we try and load a local version first in this example so that our specs don't use gem files.
-# PATH HACK
-require "lib/mandy"
+require "rubygems"
+require "jmandy"
 
 # a job can consist of a map block, a reduce block or both along with some configuration options.
 # this job counts words in the input document.
-Mandy.job "Word Count" do
+JMandy.job "Word Count" do
   map_tasks 5
   reduce_tasks 5
   
@@ -21,11 +19,11 @@ Mandy.job "Word Count" do
     words.each {|word, count| emit(word, count) }
   end
   
-  reduce(Mandy::Reducers::SumReducer)
+  reduce(JMandy::Reducers::SumReducer)
 end
 
 # this job takes the output of the wordcount and draws a very simple histogram
-Mandy.job "Histogram" do
+JMandy.job "Histogram" do
   RANGES = [0..1, 2..3, 4..5, 6..10, 11..20, 21..30, 31..40, 41..50, 51..100, 101..200, 201..300, 301..10_000, 10_001..99_999]
   map do |word, count|
     range = RANGES.find {|range| range.include?(count.to_i) }

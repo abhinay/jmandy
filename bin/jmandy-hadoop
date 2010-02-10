@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+require "rubygems"
+require "jmandy"
+require 'optparse'
+require 'ostruct'
+require 'uri'
+
+errors = false
+options = OpenStruct.new
+
+OptionParser.new do |opts|
+  opts.banner = "USAGE: jmandy-hadoop script input output"
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
+
+exec('jmandy-hadoop -h') unless ARGV.size >= 3
+
+def absolute_path(path)
+  path =~ /^\// ? path : File.join(Dir.pwd, path)
+end
+
+def set_env(opts_string)
+  return if opts_string.nil?
+  opts_string.split(' ').each do |pair|
+    key, value = pair.split("=")
+    ENV[key] = value
+  end
+end
+
+file   = File.expand_path(ARGV[0])
+inputs  = ARGV[1].split(",")
+input = inputs.map {|path| "#{path}"}.join(" ")
+
+output_folder = ARGV[2]
+config = absolute_path(options.config || 'cluster.xml')
+puts "Packaging code for distribution..."
+cmdenv = options.cmdenv
+set_env(cmdenv)
+
+at_exit do
+  puts
+  puts "Cleaning up..."
+  puts errors ? "Completed with errors!" : "Completed Successfully!"
+end
+
+puts "Loading JMandy scripts..."
+require absolute_path(file)
+
+output = nil
+puts
+begin
+  JMandy::Job.jobs.each_with_index do |job, i|
+    puts "Submitting Job: [#{i+1}] #{job.name}..."
+    
+    jobconf = job.settings.map { |key, value| %(-D #{key}='#{value}') }.join(' ')
+    output = File.join(output_folder, "#{i+1}-#{job.name.downcase.gsub(/\W/, '-')}")
+    bootstrap_file = File.expand_path(File.join(File.dirname(__FILE__), '..', 'bootstrap.rb'))
+
+    command = %(joh #{bootstrap_file} #{input} #{output} #{file} #{URI.escape(job.name)})
+    puts command
+    result = []
+    IO.popen(command, 'r') do |subprocess|
+      while line = subprocess.gets
+        if line.include?('Running job:')
+          job_id = line.split(' ').last.strip
+          puts "Job ID: #{job_id}"
+          puts "Kill Command: mandy-kill #{job_id}"         
+        end
+        puts "Tracking URL: #{line.split(' ').last.strip}" if line.include?('Tracking URL:')
+        result << line
+      end
+    end
+    
+    raise(JMandy::HadoopJobFailure.new(job, result.join("\n"))) unless $?.to_i==0
+    puts
+    # puts "#{command}"
+    input = "#{output}"
+  end
+  # print out the output location so caller can know where to get the results from
+  puts output
+rescue JMandy::HadoopJobFailure => e
+  errors = true
+  STDERR.puts e.to_s
+  exit(1)
+end
