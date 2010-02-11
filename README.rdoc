@@ -23,23 +23,23 @@ You can get Hadoop job results in your hdfs test/outputs/part-*
 == Example 
 see also examples/word_count.rb
 
-require "rubygems"
-require "jmandy"
+  require "rubygems"
+  require "jmandy"
 
-JMandy.job "Word Count" do
-  map do |key, value|
-    words = {}
-    value.split(' ').each do |word|
-      word = word.downcase.gsub!(/\W|[0-9]/, '')
-      next if word.size == 0
-      words[word] ||= 0 
-      words[word] += 1
+  JMandy.job "Word Count" do
+    map do |key, value|
+      words = {}
+      value.split(' ').each do |word|
+        word = word.downcase.gsub!(/\W|[0-9]/, '')
+        next if word.size == 0
+        words[word] ||= 0 
+        words[word] += 1
+      end
+      words.each {|word, count| emit(word, count) }
     end
-    words.each {|word, count| emit(word, count) }
-  end
   
-  reduce(JMandy::Reducers::SumReducer)
-end
+    reduce(JMandy::Reducers::SumReducer)
+  end
 
 == Authors
 "Andy Kent", "Paul Ingles", "Abhinay Mehta"
