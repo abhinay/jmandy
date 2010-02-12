@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require "rubygems"
-require "jmandy"
+require 'jmandy'
 require 'optparse'
 require 'ostruct'
 require 'uri'
@@ -31,6 +31,12 @@ def set_env(opts_string)
   end
 end
 
+def check_env
+  %w(JAVA_HOME JRUBY_HOME HADOOP_HOME).each do |env|
+    raise "#{env} not found" unless ENV[env]
+  end
+end
+
 file   = File.expand_path(ARGV[0])
 inputs  = ARGV[1].split(",")
 input = inputs.map {|path| "#{path}"}.join(" ")
@@ -40,6 +46,7 @@ config = absolute_path(options.config || 'cluster.xml')
 puts "Packaging code for distribution..."
 cmdenv = options.cmdenv
 set_env(cmdenv)
+check_env
 
 at_exit do
   puts

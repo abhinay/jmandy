@@ -7,6 +7,9 @@ JMandy.job "Word Count" do
   map_tasks 5
   reduce_tasks 5
   
+  setup do
+  end
+  
   map do |key, value|
     words = {}
     value.split(' ').each do |word|

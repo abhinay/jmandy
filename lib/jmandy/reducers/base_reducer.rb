@@ -10,14 +10,18 @@ module JMandy
         Class.new(JMandy::Reducers::Base) do 
           self.class_eval do
             define_method(:reducer, blk) if blk
+            define_method(:setup, opts[:setup]) if opts[:setup]
+            define_method(:teardown, opts[:teardown]) if opts[:teardown]
           end
         end
       end
-    
+      
       def execute
+        setup if self.respond_to?(:setup)
         reducer(@key, @values)
+        teardown if self.respond_to?(:teardown)
       end
-    
+      
       private
       
       def reducer(key,values)

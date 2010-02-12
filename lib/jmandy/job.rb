@@ -86,11 +86,17 @@ module JMandy
     end
     
     def compile_map
-      @map.is_a?(Proc) ? JMandy::Mappers::Base.compile({}, &@map) : @map
+      args = {}
+      args[:setup] = @setup if @setup
+      args[:teardown] = @teardown if @teardown
+      @map.is_a?(Proc) ? JMandy::Mappers::Base.compile(args, &@map) : @map
     end
     
     def compile_reduce
-      @reduce.is_a?(Proc) ? JMandy::Reducers::Base.compile({}, &@reduce) : @reduce
+      args = {}
+      args[:setup] = @setup if @setup
+      args[:teardown] = @teardown if @teardown
+      @reduce.is_a?(Proc) ? JMandy::Reducers::Base.compile(args, &@reduce) : @reduce
     end
   end
 end
