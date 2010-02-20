@@ -52,16 +52,14 @@ module JMandy
       @reduce = klass || blk
     end
     
-    def run_map(key, value, output, &blk)
-      mapper = mapper_class.new(key, value, output)
-      yield(mapper) if blk
-      mapper.execute
+    def mapper(output)
+      return JMandy::Mappers::PassThroughMapper.new(output) unless @map
+      compile_map.new(output)
     end
     
-    def run_reduce(key, values, output, &blk)
-      reducer = reducer_class.new(key, values, output)
-      yield(reducer) if blk
-      reducer.execute
+    def reducer(output)
+      return JMandy::Reducers::PassThroughReducer.new(output) unless @reduce
+      compile_reduce.new(output)
     end
     
     def reducer_defined?
@@ -75,16 +73,6 @@ module JMandy
       reduce_tasks(reducer_defined? ? 1 : 0)
     end
 
-    def mapper_class
-      return JMandy::Mappers::PassThroughMapper unless @map
-      @mapper_class ||= compile_map
-    end
-    
-    def reducer_class
-      return JMandy::Reducers::PassThroughReducer unless @reduce
-      @reducer_class ||= compile_reduce
-    end
-    
     def compile_map
       args = {}
       args[:setup] = @setup if @setup

@@ -1,7 +1,7 @@
 module JMandy
   module Reducers
     class TransposeReducer < Base
-      def reducer(key,values)
+      def reduce(key,values)
         values.each {|value| emit(value, key) }
       end
     end

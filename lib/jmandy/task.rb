@@ -1,9 +1,11 @@
 module JMandy
   class Task
     NUMERIC_PADDING = 16
-
-    attr_reader :input_format, :output_format
     
+    def output=(output)
+      @output = output
+    end
+
     def emit(key, value)
       @output.collect key, value
     end

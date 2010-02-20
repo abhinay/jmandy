@@ -15,15 +15,23 @@ def setup(conf)
 end
 
 def map(key, value, context)
-  script = context.get_conf.get("mandy.job.script")
-  job_name = context.get_conf.get("mandy.job.name")
-  require script
-  JMandy::Job.find_by_name(job_name).run_map(key, value, context)
+  unless @mapper
+    require context.get_conf.get("mandy.job.script")
+    job_name = context.get_conf.get("mandy.job.name")
+    @mapper = JMandy::Job.find_by_name(job_name).mapper(context)
+    @mapper.setup if @mapper.respond_to?(:setup)
+  end
+  
+  @mapper.map(key,value)
 end
 
 def reduce(key, values, context)
-  script = context.get_conf.get("mandy.job.script")
-  job_name = context.get_conf.get("mandy.job.name")
-  require script
-  JMandy::Job.find_by_name(job_name).run_reduce(key, values, context)
+  unless @reducer
+    require context.get_conf.get("mandy.job.script")
+    job_name = context.get_conf.get("mandy.job.name")
+    @reducer = JMandy::Job.find_by_name(job_name).reducer(context)
+    @reducer.setup if @reducer.respond_to?(:setup)
+  end
+  
+  @reducer.reduce(key,values)
 end

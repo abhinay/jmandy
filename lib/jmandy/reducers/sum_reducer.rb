@@ -1,7 +1,7 @@
 module JMandy
   module Reducers
     class SumReducer < Base
-      def reducer(key,values)
+      def reduce(key,values)
         emit(key, values.inject(0) {|sum,count| sum+count.to_f})
       end
     end

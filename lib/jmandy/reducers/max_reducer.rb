@@ -1,7 +1,7 @@
 module JMandy
   module Reducers
     class MaxReducer < Base
-      def reducer(key,values)
+      def reduce(key,values)
         values.map! {|value| value.to_f}
         emit(key, values.max)
       end

@@ -1,7 +1,7 @@
 module JMandy
   module Mappers
     class TransposeMapper < Base
-      def mapper(key,value)
+      def map(key,value)
         # default map is simply a pass-through
         emit(value, key)
       end
