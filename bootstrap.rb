@@ -1,6 +1,7 @@
 require 'uri'
 
-def setup(conf)
+def setup(job)
+  conf = job.get_configuration
   args = conf.get("mapred.args").split(",")
   script = args[2]
   job_name = URI.unescape(args[3])
@@ -8,9 +9,12 @@ def setup(conf)
   conf.set("mandy.job.name", job_name)
 
   require script
-  job = JMandy::Job.find_by_name(job_name)
-  job.settings.each { |key, value| conf.set(key,value) }
-
+  mandy_job = JMandy::Job.find_by_name(job_name)
+  mandy_job.settings.each { |key, value| conf.set(key,value) }
+  
+  job.set_output_key_class(Java::OrgApacheHadoopIo::Text);
+	job.set_output_value_class(Java::OrgApacheHadoopIo::Text);
+  
   return nil
 end
 
@@ -18,6 +22,7 @@ def map(key, value, context)
   unless @mapper
     require context.get_conf.get("mandy.job.script")
     job_name = context.get_conf.get("mandy.job.name")
+    # raise "Key:#{key}, value:#{value}" if job_name == "Histogram"
     @mapper = JMandy::Job.find_by_name(job_name).mapper(context)
     @mapper.setup if @mapper.respond_to?(:setup)
   end
@@ -29,6 +34,7 @@ def reduce(key, values, context)
   unless @reducer
     require context.get_conf.get("mandy.job.script")
     job_name = context.get_conf.get("mandy.job.name")
+    raise "Key:#{key}, value:#{values}" if job_name == "Histogram"
     @reducer = JMandy::Job.find_by_name(job_name).reducer(context)
     @reducer.setup if @reducer.respond_to?(:setup)
   end

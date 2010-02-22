@@ -7,7 +7,7 @@ module JMandy
     end
 
     def emit(key, value)
-      @output.collect key, value
+      @output.collect key.to_s, value.to_s
     end
     
     private
