@@ -1,5 +1,6 @@
 module JMandy
   class Task
+    KEY_VALUE_SEPERATOR = "\t" unless defined?(KEY_VALUE_SEPERATOR)
     NUMERIC_PADDING = 16
     
     def output=(output)

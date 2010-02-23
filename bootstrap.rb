@@ -22,19 +22,18 @@ def map(key, value, context)
   unless @mapper
     require context.get_conf.get("mandy.job.script")
     job_name = context.get_conf.get("mandy.job.name")
-    # raise "Key:#{key}, value:#{value}" if job_name == "Histogram"
     @mapper = JMandy::Job.find_by_name(job_name).mapper(context)
     @mapper.setup if @mapper.respond_to?(:setup)
   end
   
-  @mapper.map(key,value)
+  key_value = value.split(JMandy::Task::KEY_VALUE_SEPERATOR)
+  @mapper.map(*key_value) unless key_value.empty?
 end
 
 def reduce(key, values, context)
   unless @reducer
     require context.get_conf.get("mandy.job.script")
     job_name = context.get_conf.get("mandy.job.name")
-    raise "Key:#{key}, value:#{values}" if job_name == "Histogram"
     @reducer = JMandy::Job.find_by_name(job_name).reducer(context)
     @reducer.setup if @reducer.respond_to?(:setup)
   end

@@ -10,7 +10,7 @@ JMandy.job "Word Count" do
   setup do
   end
   
-  map do |key, value|
+  map do |value|
     words = {}
     value.split(' ').each do |word|
       word.downcase!
