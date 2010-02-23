@@ -21,7 +21,7 @@ module JMandy
       @map, @reduce = nil, nil
       set('mapred.job.name', name)
       instance_eval(&blk) if blk
-      auto_set_reduce_count
+      reduce_tasks(1) unless @settings.has_key?('mapred.reduce.tasks')
     end
     
     def set(key, value)
@@ -68,11 +68,6 @@ module JMandy
     
     private
     
-    def auto_set_reduce_count
-      return if settings.has_key?('mapred.reduce.tasks')
-      reduce_tasks(reducer_defined? ? 1 : 0)
-    end
-
     def compile_map
       args = {}
       args[:setup] = @setup if @setup
