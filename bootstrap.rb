@@ -7,7 +7,7 @@ def setup(job)
   job_name = URI.unescape(args[3])
   conf.set("mandy.job.script", script)
   conf.set("mandy.job.name", job_name)
-
+  
   require script
   mandy_job = JMandy::Job.find_by_name(job_name)
   mandy_job.settings.each { |key, value| conf.set(key,value) }
