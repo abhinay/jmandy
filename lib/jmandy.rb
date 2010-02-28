@@ -4,7 +4,8 @@ require "fileutils"
 
 %w(
   task
-  job 
+  job
+  packer
   support/tuple 
   support/array_serializer 
   mappers/base_mapper 

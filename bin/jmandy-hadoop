@@ -37,20 +37,22 @@ def check_env
   end
 end
 
-file   = File.expand_path(ARGV[0])
-inputs  = ARGV[1].split(",")
+file = File.expand_path(ARGV[0])
+inputs = ARGV[1].split(",")
 input = inputs.map {|path| "#{path}"}.join(" ")
-
 output_folder = ARGV[2]
-config = absolute_path(options.config || 'cluster.xml')
-puts "Packaging code for distribution..."
+
 cmdenv = options.cmdenv
 set_env(cmdenv)
 check_env
 
+puts "Packaging code for distribution..."
+payload = JMandy::Packer.pack
+
 at_exit do
   puts
   puts "Cleaning up..."
+  JMandy::Packer.cleanup!(payload)
   puts errors ? "Completed with errors!" : "Completed Successfully!"
 end
 
@@ -67,7 +69,7 @@ begin
     output = File.join(output_folder, "#{i+1}-#{job.name.downcase.gsub(/\W/, '-')}")
     bootstrap_file = File.expand_path(File.join(File.dirname(__FILE__), '..', 'bootstrap.rb'))
 
-    command = %(joh #{bootstrap_file} #{input} #{output} #{file} #{URI.escape(job.name)})
+    command = %(joh #{bootstrap_file} #{input} #{output} #{file} #{URI.escape(job.name)} #{payload})
     puts command
     result = []
     IO.popen(command, 'r') do |subprocess|
@@ -84,9 +86,9 @@ begin
     
     raise(JMandy::HadoopJobFailure.new(job, result.join("\n"))) unless $?.to_i==0
     puts
-    # puts "#{command}"
     input = "#{output}"
   end
+  
   # print out the output location so caller can know where to get the results from
   puts output
 rescue JMandy::HadoopJobFailure => e

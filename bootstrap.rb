@@ -20,6 +20,7 @@ end
 
 def map(key, value, context)
   unless @mapper
+    uncompress_payload
     require context.get_conf.get("mandy.job.script")
     job_name = context.get_conf.get("mandy.job.name")
     @mapper = JMandy::Job.find_by_name(job_name).mapper(context)
@@ -32,6 +33,7 @@ end
 
 def reduce(key, values, context)
   unless @reducer
+    uncompress_payload
     require context.get_conf.get("mandy.job.script")
     job_name = context.get_conf.get("mandy.job.name")
     @reducer = JMandy::Job.find_by_name(job_name).reducer(context)
@@ -39,4 +41,9 @@ def reduce(key, values, context)
   end
   
   @reducer.reduce(key,values)
+end
+
+def uncompress_payload
+  puts "Uncompressing payload"
+  `unzip bundle.zip`
 end

@@ -1,5 +1,5 @@
-require "rubygems"
-require "jmandy"
+require 'rubygems'
+require 'jmandy'
 
 # a job can consist of a map block, a reduce block or both along with some configuration options.
 # this job counts words in the input document.
