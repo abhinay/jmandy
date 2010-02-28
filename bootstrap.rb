@@ -5,8 +5,10 @@ def setup(job)
   args = conf.get("mapred.args").split(",")
   script = args[2]
   job_name = URI.unescape(args[3])
+
   conf.set("mandy.job.script", script)
   conf.set("mandy.job.name", job_name)
+  conf.set("mandy.payload.name", args[4])
   
   require script
   mandy_job = JMandy::Job.find_by_name(job_name)
@@ -20,8 +22,7 @@ end
 
 def map(key, value, context)
   unless @mapper
-    uncompress_payload
-    require context.get_conf.get("mandy.job.script")
+    uncompress_payload(context.get_conf)
     job_name = context.get_conf.get("mandy.job.name")
     @mapper = JMandy::Job.find_by_name(job_name).mapper(context)
     @mapper.setup if @mapper.respond_to?(:setup)
@@ -33,8 +34,7 @@ end
 
 def reduce(key, values, context)
   unless @reducer
-    uncompress_payload
-    require context.get_conf.get("mandy.job.script")
+    uncompress_payload(context.get_conf)
     job_name = context.get_conf.get("mandy.job.name")
     @reducer = JMandy::Job.find_by_name(job_name).reducer(context)
     @reducer.setup if @reducer.respond_to?(:setup)
@@ -43,7 +43,10 @@ def reduce(key, values, context)
   @reducer.reduce(key,values)
 end
 
-def uncompress_payload
-  puts "Uncompressing payload"
-  `unzip bundle.zip`
+def uncompress_payload(conf)
+  script = conf.get("mandy.job.script")
+  payload = conf.get("mandy.payload.name")
+  puts "Uncompressing #{payload}"
+  `unzip #{payload}` if File.exists?(payload)
+  require script
 end

@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
     lib/jmandy/support/array_serializer.rb
     lib/jmandy/task.rb
     lib/jmandy/job.rb
+    lib/jmandy/packer.rb
     lib/jmandy/mappers/base_mapper.rb
     lib/jmandy/mappers/transpose_mapper.rb
     lib/jmandy/mappers/pass_through_mapper.rb
