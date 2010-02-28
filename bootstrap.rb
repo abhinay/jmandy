@@ -47,6 +47,6 @@ def uncompress_payload(conf)
   script = conf.get("mandy.job.script")
   payload = conf.get("mandy.payload.name")
   puts "Uncompressing #{payload}"
-  `unzip #{payload}` if File.exists?(payload)
+  `tar -xf #{payload}` if File.exists?(payload)
   require script
 end

@@ -9,12 +9,12 @@ module JMandy
       tmp_path = "#{TMP_DIR}/packed-job-#{Time.now.to_i}-#{Process.pid}"
       FileUtils.mkdir_p(tmp_path)
       FileUtils.cp_r(Dir.glob(File.join(MANDY_DIR, 'lib', '*')), tmp_path)
-      Dir.chdir(tmp_path) { `zip -r bundle.zip *` }
-      File.join(tmp_path, 'bundle.zip')
+      Dir.chdir(tmp_path) { `tar -czf bundle.tar *` }
+      File.join(tmp_path, 'bundle.tar')
     end
     
     def self.cleanup!(file)
-      return false unless File.extname(file) == '.zip'
+      return false unless File.extname(file) == '.tar'
       FileUtils.rm_rf(File.dirname(file))
     end
   end
