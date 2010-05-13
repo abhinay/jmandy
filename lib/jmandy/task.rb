@@ -7,11 +7,12 @@ module JMandy
       @output = output
     end
 
-    def emit(key, value)
-      @output.collect key.to_s, value.to_s
+    def emit(key, value="")
+      @output.collect serialize_key(key), serialize_value(value)
     end
     
     private
+    
     def pad(key)
       key_parts = key.to_s.split(".")
       key_parts[0] = key_parts.first.rjust(NUMERIC_PADDING, '0')
@@ -20,13 +21,12 @@ module JMandy
     
     def serialize_key(key)
       key = pad(key) if key.is_a?(Numeric) && key.to_s.length < NUMERIC_PADDING
-      key
+      key.to_s
     end
 
     def serialize_value(value)
       value = ArraySerializer.new(value) if value.is_a?(Array)
       value.to_s
     end
-
   end
 end

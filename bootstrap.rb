@@ -29,7 +29,15 @@ def map(key, value, context)
   end
   
   key_value = value.split(JMandy::Task::KEY_VALUE_SEPERATOR)
-  @mapper.map(*key_value) unless key_value.empty?
+  
+  if key_value.size > 1
+    k = key_value[0]
+    v = key_value[1..-1].join(JMandy::Task::KEY_VALUE_SEPERATOR)
+    @mapper.map(k,v)
+  elsif key_value.size == 1
+    @mapper.map(value)
+  end
+  
 end
 
 def reduce(key, values, context)
